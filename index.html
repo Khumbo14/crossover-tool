@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GE Appliances Air & Water Crossover Tool</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: #f5f5f5;
+      color: #333;
+      font-size: 16px;
+    }
+
+    main {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 48px 24px;
+    }
+
+    /* ── Title & Intro ── */
+    .intro h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #3d5a80;
+      margin-bottom: 12px;
+    }
+
+    .intro p {
+      font-size: 1rem;
+      color: #444;
+      max-width: 750px;
+      line-height: 1.6;
+      margin-bottom: 32px;
+    }
+
+    /* ── Search Card ── */
+    .search-card {
+      background: #fff;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 32px;
+      margin-bottom: 24px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    }
+
+    .search-card label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #3d5a80;
+      margin-bottom: 8px;
+    }
+
+    .search-row {
+      display: flex;
+      gap: 12px;
+      position: relative;
+    }
+
+    .input-wrapper {
+      flex: 1;
+      position: relative;
+    }
+
+    #model-search {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 1rem;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    #model-search:focus {
+      border-color: #7db3d5;
+      box-shadow: 0 0 0 3px rgba(125,179,213,0.25);
+    }
+
+    /* ── Autocomplete Dropdown ── */
+    #dropdown {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: #fff;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+      max-height: 260px;
+      overflow-y: auto;
+      z-index: 100;
+      margin-top: 4px;
+    }
+
+    .dropdown-item {
+      padding: 10px 16px;
+      cursor: pointer;
+      font-size: 0.95rem;
+      transition: background 0.15s;
+    }
+
+    .dropdown-item:hover,
+    .dropdown-item.active {
+      background-color: #7db3d5;
+      color: #fff;
+    }
+
+    /* ── Search Button ── */
+    #search-btn {
+      background-color: #7db3d5;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 12px 28px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: background 0.2s;
+      white-space: nowrap;
+    }
+
+    #search-btn:hover {
+      background-color: #6ba3c5;
+    }
+
+    #search-btn svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    .search-hint {
+      margin-top: 10px;
+      font-size: 0.82rem;
+      color: #666;
+    }
+
+    /* ── Results Card ── */
+    #results-section {
+      display: none;
+      background: #fff;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 32px;
+      margin-bottom: 24px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    }
+
+    .results-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #3d5a80;
+      margin-bottom: 20px;
+    }
+
+    .results-title span {
+      font-weight: 400;
+      color: #555;
+    }
+
+    .curb-info-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #3d5a80;
+      margin-bottom: 16px;
+    }
+
+    .curb-info-title span {
+      font-weight: 400;
+      color: #555;
+    }
+
+    /* ── Result Item ── */
+    .result-item {
+      border: 2px solid #7db3d5;
+      border-radius: 4px;
+      padding: 16px;
+      margin-bottom: 12px;
+    }
+
+    .result-model {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #3d5a80;
+      margin-bottom: 10px;
+    }
+
+    .result-detail {
+      font-size: 0.88rem;
+      color: #444;
+      margin-bottom: 4px;
+      line-height: 1.5;
+    }
+
+    .result-detail strong {
+      font-weight: 600;
+    }
+
+    /* ── Not Found ── */
+    .not-found {
+      border-left: 4px solid #f0b429;
+      padding: 12px 16px;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .not-found svg {
+      color: #f0b429;
+      flex-shrink: 0;
+      margin-top: 2px;
+      width: 22px;
+      height: 22px;
+    }
+
+    .not-found h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #3d5a80;
+      margin-bottom: 6px;
+    }
+
+    .not-found p {
+      font-size: 0.88rem;
+      color: #555;
+    }
+
+    .not-found a {
+      color: #7db3d5;
+      font-weight: 600;
+      text-decoration: none;
+    }
+
+    .not-found a:hover {
+      text-decoration: underline;
+    }
+
+    /* ── Results Disclaimer ── */
+    .results-disclaimer {
+      margin-top: 28px;
+      font-size: 0.82rem;
+      color: #666;
+      font-style: italic;
+      line-height: 1.6;
+    }
+
+    /* ── Bottom Disclaimer ── */
+    .bottom-disclaimer {
+      background-color: #e8f2f7;
+      border-left: 4px solid #7db3d5;
+      padding: 16px 20px;
+      font-size: 0.82rem;
+      color: #555;
+      font-style: italic;
+      line-height: 1.6;
+      border-radius: 2px;
+      margin-top: 8px;
+    }
+
+    /* ── Loading ── */
+    #loading {
+      text-align: center;
+      padding: 32px;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+
+<main>
+
+  <!-- Intro -->
+  <div class="intro">
+    <h1>GE Appliances Air &amp; Water Crossover Tool</h1>
+    <p>
+      The GE Appliances Crossover Tool gives you instant access to rooftop unit matchups,
+      so no matter which brand or model you're replacing, this easy-to-use tool can help
+      find a comparable GE Appliances Air &amp; Water packaged unit.
+    </p>
+  </div>
+
+  <!-- Loading State -->
+  <div id="loading">Loading crossover data…</div>
+
+  <!-- Search Card (hidden until data loads) -->
+  <div class="search-card" id="search-card" style="display:none;">
+    <label for="model-search">Enter Competitor Model Number</label>
+
+    <div class="search-row">
+      <div class="input-wrapper">
+        <input
+          id="model-search"
+          type="text"
+          placeholder="Enter existing model number"
+          autocomplete="off"
+        />
+        <div id="dropdown"></div>
+      </div>
+
+      <button id="search-btn">
+        <!-- Search icon (inline SVG) -->
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none"
+             viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"/>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        Search
+      </button>
+    </div>
+
+    <p class="search-hint">
+      Search is case-insensitive. Press Enter or click Search to find compatible GE Appliances units.
+    </p>
+  </div>
+
+  <!-- Results Section -->
+  <div id="results-section"></div>
+
+  <!-- Bottom Disclaimer -->
+  <div class="bottom-disclaimer">
+    This tool is for replacements only and should not be used to provide "equals" to any specified
+    or new construction projects. All crossovers will be standard efficiency models where available.
+    It is the responsibility of the installing contractor to verify fit and voltage for each
+    application. Curb Adapters are designed to fit on OEM (factory) curbs only.
+  </div>
+
+</main>
+
+<script>
+// ─────────────────────────────────────────────
+//  Configuration
+// ─────────────────────────────────────────────
+const CSV_PATH = 'AAE Cross Over Item_contents_2_4_2026_Z Series.csv';
+
+// ─────────────────────────────────────────────
+//  State
+// ─────────────────────────────────────────────
+let crossoverData = [];   // parsed rows
+let selectedIndex  = -1;  // keyboard nav in dropdown
+let currentSuggestions = [];
+
+// ─────────────────────────────────────────────
+//  DOM refs
+// ─────────────────────────────────────────────
+const loadingEl      = document.getElementById('loading');
+const searchCard     = document.getElementById('search-card');
+const searchInput    = document.getElementById('model-search');
+const dropdown       = document.getElementById('dropdown');
+const searchBtn      = document.getElementById('search-btn');
+const resultsSection = document.getElementById('results-section');
+
+// ─────────────────────────────────────────────
+//  CSV Parser  (handles quoted fields)
+// ─────────────────────────────────────────────
+function parseCSV(text) {
+  const lines = text.split(/\r?\n/).filter(l => l.trim());
+  const headers = splitCSVLine(lines[0]);
+  const rows = [];
+
+  for (let i = 1; i < lines.length; i++) {
+    const cols = splitCSVLine(lines[i]);
+    if (cols.length < 2) continue;
+    const row = {};
+    headers.forEach((h, idx) => { row[h.trim()] = (cols[idx] || '').trim(); });
+    rows.push(row);
+  }
+  return rows;
+}
+
+function splitCSVLine(line) {
+  const result = [];
+  let cur = '', inQuote = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (ch === '"') { inQuote = !inQuote; }
+    else if (ch === ',' && !inQuote) { result.push(cur); cur = ''; }
+    else { cur += ch; }
+  }
+  result.push(cur);
+  return result;
+}
+
+// ─────────────────────────────────────────────
+//  Map a CSV row → result object
+// ─────────────────────────────────────────────
+function mapRow(row) {
+  const curbAdapter = (row['curbAdapter'] || '').trim();
+  const geaModel    = (row['GEAModelNumber'] || '').trim();
+  const competitor  = (row['CompetitorModelNumber'] || '').trim();
+
+  // Determine curb status
+  let curbRequired       = 'No';
+  let curbPartNumber     = '';
+  let curbNote           = '';
+  let curbAdapterStatus  = '';
+
+  const lowerCurb = curbAdapter.toLowerCase();
+
+  if (lowerCurb === 'no transition curb needed') {
+    curbRequired = 'No';
+  } else if (lowerCurb === 'ducting transition may be required.') {
+    curbRequired      = 'No';
+    curbAdapterStatus = 'Ducting Transition';
+    curbNote          = curbAdapter;
+  } else if (curbAdapter !== '') {
+    curbRequired   = 'Yes';
+    curbPartNumber = curbAdapter;
+  }
+
+  return {
+    competitorModel:  competitor,
+    geaModel,
+    curbRequired,
+    curbPartNumber,
+    curbNote,
+    curbAdapterStatus,
+  };
+}
+
+// ─────────────────────────────────────────────
+//  Load CSV
+// ─────────────────────────────────────────────
+async function loadData() {
+  try {
+    const resp = await fetch(CSV_PATH);
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    const text = await resp.text();
+    const rows = parseCSV(text);
+    crossoverData = rows.map(mapRow).filter(r => r.competitorModel && r.geaModel);
+
+    loadingEl.style.display   = 'none';
+    searchCard.style.display  = 'block';
+  } catch (err) {
+    loadingEl.textContent = `⚠️ Could not load data: ${err.message}. Make sure the CSV file is in the same folder as this HTML file.`;
+    console.error(err);
+  }
+}
+
+// ─────────────────────────────────────────────
+//  Autocomplete
+// ─────────────────────────────────────────────
+function updateSuggestions(query) {
+  if (query.length < 2) {
+    hideDropdown();
+    return;
+  }
+
+  const q = query.toLowerCase();
+  const seen = new Set();
+
+  crossoverData.forEach(item => {
+    if (item.competitorModel.toLowerCase().includes(q)) {
+      seen.add(item.competitorModel);
+    }
+  });
+
+  currentSuggestions = Array.from(seen)
+    .sort((a, b) => {
+      const aS = a.toLowerCase().startsWith(q);
+      const bS = b.toLowerCase().startsWith(q);
+      if (aS && !bS) return -1;
+      if (!aS && bS) return  1;
+      return a.localeCompare(b);
+    })
+    .slice(0, 15);
+
+  if (currentSuggestions.length === 0) { hideDropdown(); return; }
+
+  selectedIndex = -1;
+  renderDropdown();
+}
+
+function renderDropdown() {
+  dropdown.innerHTML = '';
+  currentSuggestions.forEach((model, i) => {
+    const div = document.createElement('div');
+    div.className = 'dropdown-item' + (i === selectedIndex ? ' active' : '');
+    div.textContent = model;
+    div.addEventListener('mousedown', (e) => {
+      e.preventDefault(); // prevent blur firing before click
+      selectSuggestion(model);
+    });
+    dropdown.appendChild(div);
+  });
+  dropdown.style.display = 'block';
+}
+
+function hideDropdown() {
+  dropdown.style.display = 'none';
+  currentSuggestions = [];
+  selectedIndex = -1;
+}
+
+function selectSuggestion(model) {
+  searchInput.value = model;
+  hideDropdown();
+}
+
+// ─────────────────────────────────────────────
+//  Search
+// ─────────────────────────────────────────────
+function handleSearch() {
+  const query = searchInput.value.trim();
+  if (!query) return;
+
+  hideDropdown();
+
+  const matches = crossoverData.filter(
+    item => item.competitorModel.toLowerCase() === query.toLowerCase()
+  );
+
+  renderResults(matches, query);
+}
+
+// ─────────────────────────────────────────────
+//  Render Results
+// ─────────────────────────────────────────────
+function renderResults(matches, query) {
+  resultsSection.style.display = 'block';
+
+  if (matches.length === 0) {
+    resultsSection.innerHTML = `
+      <div class="not-found">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none"
+             viewBox="0 0 24 24" stroke="#f0b429" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="8" x2="12" y2="12"/>
+          <line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+        <div>
+          <h3>Model not found</h3>
+          <p>
+            Model not found. Please verify the model number and try again.
+            If you continue to experience issues, please
+            <a href="https://www.geappliancesairandwater.com/contact-us/"
+               target="_blank" rel="noopener noreferrer">
+              contact GE Appliances support
+            </a>.
+          </p>
+        </div>
+      </div>`;
+    return;
+  }
+
+  // Unique GEA model numbers
+  const geaModels = [...new Set(matches.map(r => r.geaModel))].join(', ');
+
+  let html = `
+    <p class="results-title">
+      GE Appliances Model Number${matches.length > 1 ? 's' : ''}:
+      <span>${geaModels}</span>
+    </p>
+    <p class="curb-info-title">
+      Curb Information <span>(in parenthesis below)</span>
+    </p>
+    <div class="results-list">`;
+
+  matches.forEach(result => {
+    html += `<div class="result-item">`;
+    html += `<p class="result-model">${result.geaModel}</p>`;
+
+    const isSpecial = result.curbNote &&
+      (result.curbAdapterStatus === 'Horizontal Only' ||
+       result.curbAdapterStatus === 'Ducting Transition' ||
+       result.curbAdapterStatus === 'Ducting Transition with Part');
+
+    if (isSpecial) {
+      html += `<p class="result-detail">${result.curbNote}</p>`;
+    } else {
+      html += `<p class="result-detail"><strong>Curb Required:</strong> ${result.curbRequired}</p>`;
+      if (result.curbRequired === 'Yes' && result.curbPartNumber) {
+        html += `<p class="result-detail"><strong>Curb Part Number:</strong> ${result.curbPartNumber}</p>`;
+        if (result.curbNote) {
+          html += `<p class="result-detail">${result.curbNote}</p>`;
+        }
+      }
+    }
+
+    html += `</div>`;
+  });
+
+  html += `</div>`;
+
+  html += `
+    <p class="results-disclaimer">
+      This tool is for replacements only and should not be used to provide "equals" to any
+      specified or new construction projects. All crossovers will be standard efficiency models
+      where available. It is the responsibility of the installing contractor to verify fit and
+      voltage for each application. Curb Adapters are designed to fit on OEM (factory) curbs only.
+    </p>`;
+
+  resultsSection.innerHTML = html;
+}
+
+// ─────────────────────────────────────────────
+//  Event Listeners
+// ─────────────────────────────────────────────
+searchInput.addEventListener('input', () => {
+  updateSuggestions(searchInput.value);
+});
+
+searchInput.addEventListener('keydown', (e) => {
+  if (!dropdown.style.display || dropdown.style.display === 'none') {
+    if (e.key === 'Enter') handleSearch();
+    return;
+  }
+
+  if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    selectedIndex = Math.min(selectedIndex + 1, currentSuggestions.length - 1);
+    renderDropdown();
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    selectedIndex = Math.max(selectedIndex - 1, -1);
+    renderDropdown();
+  } else if (e.key === 'Enter') {
+    e.preventDefault();
+    if (selectedIndex >= 0) {
+      selectSuggestion(currentSuggestions[selectedIndex]);
+    } else {
+      handleSearch();
+    }
+  } else if (e.key === 'Escape') {
+    hideDropdown();
+  }
+});
+
+searchInput.addEventListener('blur', () => {
+  // Small delay so mousedown on dropdown item fires first
+  setTimeout(hideDropdown, 150);
+});
+
+searchBtn.addEventListener('click', handleSearch);
+
+// ─────────────────────────────────────────────
+//  Boot
+// ─────────────────────────────────────────────
+loadData();
+</script>
+</body>
+</html>
