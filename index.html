@@ -348,7 +348,7 @@ function mapRow(row) {
   if (curbAdapter === '') {
     // ← NEW: blank field means we don't stock a curb adapter
     curbRequired   = 'Yes';
-    curbPartNumber = 'Part is not stocked';
+    curbPartNumber = 'GE Appliances does not stock this necessary curb adaptor. Please contact distributor for further assistance.';
   } else if (lowerCurb === 'no transition curb needed') {
     curbRequired = 'No';
   } else if (lowerCurb === 'ducting transition may be required.') {
@@ -471,11 +471,7 @@ function renderResults(matches, query) {
           <h3>Model not found</h3>
           <p>
             Model not found. Please verify the model number and try again.
-            If you continue to experience issues, please
-            <a href="https://www.geappliancesairandwater.com/contact-us/"
-               target="_blank" rel="noopener noreferrer">
-              contact GE Appliances support
-            </a>.
+            If you continue to experience issues, please contact HVACsupport@geappliances.com
           </p>
         </div>
       </div>`;
