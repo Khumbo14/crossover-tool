@@ -170,7 +170,6 @@
     .result-detail strong {
       font-weight: 600;
     }
-    /* ── Not Found ── */
     .not-found {
       border-left: 4px solid #f0b429;
       padding: 12px 16px;
@@ -237,9 +236,7 @@
       find a comparable GE Appliances Air &amp; Water packaged unit.
     </p>
   </div>
-
   <div id="loading">Loading crossover data…</div>
-
   <div class="search-card" id="search-card" style="display:none;">
     <label for="model-search">Enter Competitor Model Number</label>
     <div class="search-row">
@@ -265,9 +262,7 @@
       Search is case-insensitive. Press Enter or click Search to find compatible GE Appliances units.
     </p>
   </div>
-
   <div id="results-section"></div>
-
   <div class="bottom-disclaimer">
     This tool is for replacements only and should not be used to provide "equals" to any specified
     or new construction projects. All crossovers will be standard efficiency models where available.
@@ -275,7 +270,6 @@
     application. Curb Adapters are designed to fit on OEM (factory) curbs only.
   </div>
 </main>
-
 <script>
 // ─────────────────────────────────────────────
 //  Configuration
@@ -331,7 +325,12 @@ function splitCSVLine(line) {
 
 // ─────────────────────────────────────────────
 //  Map a CSV row → result object
-//  FIX 1: blank curbAdapter → "Yes" + "We do not stock"
+//
+//  curbAdapter field logic:
+//  - blank                            → Curb Required: Yes, Part: "GE Appliances does not stock..."
+//  - "no transition curb needed"      → Curb Required: No
+//  - "ducting transition may be..."   → Curb Required: Yes, Part: "Ducting Transition may be required."
+//  - anything else (a part number)    → Curb Required: Yes, Part: <the part number>
 // ─────────────────────────────────────────────
 function mapRow(row) {
   const curbAdapter = (row['curbAdapter'] || '').trim();
@@ -346,17 +345,23 @@ function mapRow(row) {
   const lowerCurb = curbAdapter.toLowerCase();
 
   if (curbAdapter === '') {
-    // ← NEW: blank field means we don't stock a curb adapter
+    // Blank → we don't stock a curb adapter
     curbRequired   = 'Yes';
     curbPartNumber = 'GE Appliances does not stock this necessary curb adaptor. Please contact distributor for further assistance.';
+
   } else if (lowerCurb === 'no transition curb needed') {
+    // No curb needed at all
     curbRequired = 'No';
-  } else if (lowerCurb === 'ducting transition may be required.') {
-    curbRequired      = 'No';
+
+  } else if (lowerCurb.includes('ducting transition may be required')) {
+    // ── KEY FIX ──
+    // Treat as curb required, surface the text as the part number
+    curbRequired      = 'Yes';
+    curbPartNumber    = curbAdapter; // "Ducting Transition may be required."
     curbAdapterStatus = 'Ducting Transition';
-    curbNote          = curbAdapter;
+
   } else {
-    // Has an actual part number
+    // Actual part number (e.g. "10L32", "31B67", etc.)
     curbRequired   = 'Yes';
     curbPartNumber = curbAdapter;
   }
@@ -451,7 +456,6 @@ function handleSearch() {
 
 // ─────────────────────────────────────────────
 //  Render Results
-//  FIX 2: corrected exclamation-mark SVG icon
 // ─────────────────────────────────────────────
 function renderResults(matches, query) {
   resultsSection.style.display = 'block';
@@ -459,7 +463,6 @@ function renderResults(matches, query) {
   if (matches.length === 0) {
     resultsSection.innerHTML = `
       <div class="not-found">
-        <!-- ✅ Proper circle-exclamation icon -->
         <svg xmlns="http://www.w3.org/2000/svg" fill="none"
              viewBox="0 0 24 24" stroke="#f0b429" stroke-width="2"
              stroke-linecap="round" stroke-linejoin="round">
@@ -471,7 +474,8 @@ function renderResults(matches, query) {
           <h3>Model not found</h3>
           <p>
             Model not found. Please verify the model number and try again.
-            If you continue to experience issues, please contact HVACsupport@geappliances.com
+            If you continue to experience issues, please contact
+            <a href="mailto:HVACsupport@geappliances.com">HVACsupport@geappliances.com</a>
           </p>
         </div>
       </div>`;
@@ -492,22 +496,18 @@ function renderResults(matches, query) {
     html += `<div class="result-item">`;
     html += `<p class="result-model">${result.geaModel}</p>`;
 
-    const isSpecial = result.curbNote &&
-      (result.curbAdapterStatus === 'Horizontal Only' ||
-       result.curbAdapterStatus === 'Ducting Transition' ||
-       result.curbAdapterStatus === 'Ducting Transition with Part');
+    // All cases now use the standard display —
+    // curbRequired + curbPartNumber covers every scenario including Ducting Transition
+    html += `<p class="result-detail"><strong>Curb Required:</strong> ${result.curbRequired}</p>`;
 
-    if (isSpecial) {
-      html += `<p class="result-detail">${result.curbNote}</p>`;
-    } else {
-      html += `<p class="result-detail"><strong>Curb Required:</strong> ${result.curbRequired}</p>`;
-      if (result.curbRequired === 'Yes' && result.curbPartNumber) {
-        html += `<p class="result-detail"><strong>Curb Part Number:</strong> ${result.curbPartNumber}</p>`;
-        if (result.curbNote) {
-          html += `<p class="result-detail">${result.curbNote}</p>`;
-        }
-      }
+    if (result.curbRequired === 'Yes' && result.curbPartNumber) {
+      html += `<p class="result-detail"><strong>Curb Part Number:</strong> ${result.curbPartNumber}</p>`;
     }
+
+    if (result.curbNote) {
+      html += `<p class="result-detail">${result.curbNote}</p>`;
+    }
+
     html += `</div>`;
   });
 
