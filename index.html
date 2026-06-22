@@ -18,8 +18,7 @@
     }
     main {
       max-width: 1100px;
-      margin: 0 auto;
-      padding: 48px 24px;
+      margin: 2rem auto;
     }
     .intro h1 {
       font-size: 2rem;
@@ -98,7 +97,7 @@
       color: #fff;
     }
     #search-btn {
-      background-color: #7db3d5;
+      background-color: #003B71;
       color: #fff;
       border: none;
       border-radius: 6px;
@@ -274,8 +273,8 @@
 // ─────────────────────────────────────────────
 //  Configuration
 // ─────────────────────────────────────────────
-const CSV_PATH = 'AAE Cross Over Item_contents_2_4_2026_Z Series.csv';
-
+//const CSV_PATH = 'https://www.geappliancesairandwater.com/content/AAE Cross Over Item_contents_2_4_2026_Z Series.csv';
+const CSV_PATH = 'C:\\GitHub\\ghes\\bc\\crossover-tool\\Z_And_Q_Series_Q2.csv';
 // ─────────────────────────────────────────────
 //  State
 // ─────────────────────────────────────────────
@@ -512,13 +511,6 @@ function renderResults(matches, query) {
   });
 
   html += `</div>`;
-  html += `
-    <p class="results-disclaimer">
-      This tool is for replacements only and should not be used to provide "equals" to any
-      specified or new construction projects. All crossovers will be standard efficiency models
-      where available. It is the responsibility of the installing contractor to verify fit and
-      voltage for each application. Curb Adapters are designed to fit on OEM (factory) curbs only.
-    </p>`;
 
   resultsSection.innerHTML = html;
 }
@@ -558,6 +550,7 @@ searchBtn.addEventListener('click', handleSearch);
 // ─────────────────────────────────────────────
 loadData();
 </script>
+
+
 </body>
 </html>
-
