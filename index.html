@@ -19,6 +19,35 @@
     main {
       max-width: 1100px;
       margin: 2rem auto;
+      padding: 0 1rem;
+    }
+    .main-toolbar {
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 12px;
+    }
+    .language-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: #3d5a80;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+    .lang-option {
+      border: none;
+      background: transparent;
+      color: #3d5a80;
+      cursor: pointer;
+      font: inherit;
+      padding: 4px 2px;
+      text-decoration: none;
+    }
+    .lang-option:hover,
+    .lang-option.active {
+      color: #003B71;
+      text-decoration: underline;
+      text-underline-offset: 3px;
     }
     .intro h1 {
       font-size: 2rem;
@@ -223,27 +252,53 @@
       padding: 32px;
       color: #666;
     }
+    @media (max-width: 640px) {
+      main {
+        margin: 1rem auto;
+      }
+      .search-card,
+      #results-section {
+        padding: 20px;
+      }
+      .search-row {
+        flex-direction: column;
+      }
+      #search-btn {
+        justify-content: center;
+      }
+    }
   </style>
 </head>
 <body>
 <main>
+  <div class="main-toolbar">
+    <div class="language-toggle" data-i18n-aria-label="languageSelectorLabel">
+      <button type="button" class="lang-option active" data-lang-toggle="en" aria-pressed="true">EN</button>
+      <span aria-hidden="true">|</span>
+      <button type="button" class="lang-option" data-lang-toggle="fr-ca" aria-pressed="false">FR</button>
+    </div>
+  </div>
+
   <div class="intro">
-    <h1>Commercial RTU Crossover Tool</h1>
-    <p>
+    <h1 data-i18n="appTitle">Commercial RTU Crossover Tool</h1>
+    <p data-i18n="introText">
       The Commercial RTU Crossover Tool gives you instant access to rooftop unit matchups,
       so no matter which brand or model you're replacing, this easy-to-use tool can help
       find a comparable GE Appliances Air &amp; Water packaged unit.
     </p>
   </div>
-  <div id="loading">Loading crossover data…</div>
+
+  <div id="loading" data-i18n="loading">Loading crossover data...</div>
+
   <div class="search-card" id="search-card" style="display:none;">
-    <label for="model-search">Enter Competitor Model Number</label>
+    <label for="model-search" data-i18n="searchLabel">Enter Competitor Model Number</label>
     <div class="search-row">
       <div class="input-wrapper">
         <input
           id="model-search"
           type="text"
           placeholder="Enter existing model number"
+          data-i18n-placeholder="searchPlaceholder"
           autocomplete="off"
         />
         <div id="dropdown"></div>
@@ -254,47 +309,152 @@
           <circle cx="11" cy="11" r="8"/>
           <line x1="21" y1="21" x2="16.65" y2="16.65"/>
         </svg>
-        Search
+        <span data-i18n="searchButton">Search</span>
       </button>
     </div>
-    <p class="search-hint">
+    <p class="search-hint" data-i18n="searchHint">
       Search is case-insensitive. Press Enter or click Search to find compatible GE Appliances units.
     </p>
   </div>
+
   <div id="results-section"></div>
-  <div class="bottom-disclaimer">
+
+  <div class="bottom-disclaimer" data-i18n="bottomDisclaimer">
     This tool is for replacements only and should not be used to provide "equals" to any specified
     or new construction projects. All crossovers will be standard efficiency models where available.
     It is the responsibility of the installing contractor to verify fit and voltage for each
     application. Curb Adapters are designed to fit on OEM (factory) curbs only. Utilize the model reference guide to select the correct model number to order for your specific product needs.
   </div>
 </main>
+
 <script>
-// ─────────────────────────────────────────────
-//  Configuration
-// ─────────────────────────────────────────────
-//const CSV_PATH = 'https://www.geappliancesairandwater.com/content/AAE Cross Over Item_contents_2_4_2026_Z Series.csv';
+const i18n = {
+  en: {
+    documentTitle: 'Commercial RTU Crossover Tool',
+    languageSelectorLabel: 'Language selector',
+    appTitle: 'Commercial RTU Crossover Tool',
+    introText: 'The Commercial RTU Crossover Tool gives you instant access to rooftop unit matchups, so no matter which brand or model you\'re replacing, this easy-to-use tool can help find a comparable GE Appliances Air & Water packaged unit.',
+    loading: 'Loading crossover data...',
+    searchLabel: 'Enter Competitor Model Number',
+    searchPlaceholder: 'Enter existing model number',
+    searchButton: 'Search',
+    searchHint: 'Search is case-insensitive. Press Enter or click Search to find compatible GE Appliances units.',
+    bottomDisclaimer: 'This tool is for replacements only and should not be used to provide "equals" to any specified or new construction projects. All crossovers will be standard efficiency models where available. It is the responsibility of the installing contractor to verify fit and voltage for each application. Curb Adapters are designed to fit on OEM (factory) curbs only. Utilize the model reference guide to select the correct model number to order for your specific product needs.',
+    loadErrorPrefix: 'Could not load data',
+    loadErrorSuffix: 'Make sure the CSV file is in the same folder as this HTML file and open the page through a local web server.',
+    modelNotFoundTitle: 'Model not found',
+    modelNotFoundMessageHtml: 'Model not found. Please verify the model number and try again. If you continue to experience issues, please contact <a href="mailto:HVACsupport@geappliances.com">HVACsupport@geappliances.com</a>.',
+    geaModelNumbersLabel: 'GE Appliances Model Number(s):',
+    curbInfoTitle: 'Curb Information',
+    curbRequiredLabel: 'Curb Required:',
+    curbPartNumberLabel: 'Curb Part Number:',
+    yes: 'Yes',
+    no: 'No',
+    curbAdapterNotStocked: 'GE Appliances does not stock this necessary curb adaptor. Please contact distributor for further assistance.',
+    ductingTransitionRequired: 'Ducting Transition may be required.',
+    ductingTransitionStatus: 'Ducting Transition'
+  },
+  'fr-ca': {
+    documentTitle: 'Outil de correspondance pour unités de toit commerciales',
+    languageSelectorLabel: 'Sélecteur de langue',
+    appTitle: 'Outil de correspondance pour unités de toit commerciales',
+    introText: 'L\'outil de correspondance pour unités de toit commerciales vous donne un accès instantané aux équivalences d\'unités de toit. Peu importe la marque ou le modèle à remplacer, cet outil facile à utiliser peut vous aider à trouver une unité monobloc GE Appliances Air & Water comparable.',
+    loading: 'Chargement des données de correspondance...',
+    searchLabel: 'Entrez le numéro de modèle du concurrent',
+    searchPlaceholder: 'Entrez le numéro de modèle existant',
+    searchButton: 'Rechercher',
+    searchHint: 'La recherche ne tient pas compte de la casse. Appuyez sur Entrée ou cliquez sur Rechercher pour trouver des unités GE Appliances compatibles.',
+    bottomDisclaimer: 'Cet outil est destiné aux remplacements seulement et ne doit pas être utilisé pour proposer des « équivalents » dans le cadre de devis ou de projets de nouvelle construction. Toutes les correspondances seront des modèles à efficacité standard lorsque disponibles. Il incombe à l’entrepreneur installateur de vérifier l’ajustement et la tension pour chaque application. Les adaptateurs de bordure de toit sont conçus pour s’adapter uniquement aux bordures OEM (d’usine). Utilisez le guide de référence des modèles pour sélectionner le bon numéro de modèle à commander selon les besoins propres à votre produit.',
+    loadErrorPrefix: 'Impossible de charger les données',
+    loadErrorSuffix: 'Assurez-vous que le fichier CSV se trouve dans le même dossier que ce fichier HTML et ouvrez la page au moyen d’un serveur Web local.',
+    modelNotFoundTitle: 'Modèle introuvable',
+    modelNotFoundMessageHtml: 'Modèle introuvable. Veuillez vérifier le numéro de modèle et réessayer. Si le problème persiste, veuillez communiquer avec <a href="mailto:HVACsupport@geappliances.com">HVACsupport@geappliances.com</a>.',
+    geaModelNumbersLabel: 'Numéro(s) de modèle GE Appliances :',
+    curbInfoTitle: 'Information sur la bordure de toit',
+    curbRequiredLabel: 'Bordure de toit requise :',
+    curbPartNumberLabel: 'Numéro de pièce de la bordure de toit :',
+    yes: 'Oui',
+    no: 'Non',
+    curbAdapterNotStocked: 'GE Appliances ne tient pas en stock l’adaptateur de bordure de toit requis. Veuillez communiquer avec le distributeur pour obtenir de l’aide.',
+    ductingTransitionRequired: 'Une transition de conduits peut être requise.',
+    ductingTransitionStatus: 'Transition de conduits'
+  }
+};
+
+// Configuration
+// const CSV_PATH = 'https://www.geappliancesairandwater.com/content/AAE Cross Over Item_contents_2_4_2026_Z Series.csv';
 const CSV_PATH = 'Z_And_Q_Series_Q2.csv';
-// ─────────────────────────────────────────────
-//  State
-// ─────────────────────────────────────────────
+
+// State
+let rawRows            = [];
 let crossoverData      = [];
 let selectedIndex      = -1;
 let currentSuggestions = [];
+let currentLang        = 'en';
+let lastSearchQuery    = '';
 
-// ─────────────────────────────────────────────
-//  DOM refs
-// ─────────────────────────────────────────────
+// DOM refs
 const loadingEl      = document.getElementById('loading');
 const searchCard     = document.getElementById('search-card');
 const searchInput    = document.getElementById('model-search');
 const dropdown       = document.getElementById('dropdown');
 const searchBtn      = document.getElementById('search-btn');
 const resultsSection = document.getElementById('results-section');
+const languageButtons = document.querySelectorAll('[data-lang-toggle]');
 
-// ─────────────────────────────────────────────
-//  CSV Parser
-// ─────────────────────────────────────────────
+function getText(key) {
+  return (i18n[currentLang] && i18n[currentLang][key]) || i18n.en[key] || '';
+}
+
+function applyLanguage(lang) {
+  currentLang = i18n[lang] ? lang : 'en';
+  const dictionary = i18n[currentLang];
+
+  document.documentElement.lang = currentLang === 'fr-ca' ? 'fr-CA' : 'en';
+  document.title = dictionary.documentTitle;
+
+  document.querySelectorAll('[data-i18n]').forEach((element) => {
+    const key = element.dataset.i18n;
+    if (dictionary[key]) element.innerText = dictionary[key];
+  });
+
+  document.querySelectorAll('[data-i18n-html]').forEach((element) => {
+    const key = element.dataset.i18nHtml;
+    if (dictionary[key]) element.innerHTML = dictionary[key];
+  });
+
+  document.querySelectorAll('[data-i18n-placeholder]').forEach((element) => {
+    const key = element.dataset.i18nPlaceholder;
+    if (dictionary[key]) element.setAttribute('placeholder', dictionary[key]);
+  });
+
+  document.querySelectorAll('[data-i18n-aria-label]').forEach((element) => {
+    const key = element.dataset.i18nAriaLabel;
+    if (dictionary[key]) element.setAttribute('aria-label', dictionary[key]);
+  });
+
+  languageButtons.forEach((button) => {
+    const isActive = button.dataset.langToggle === currentLang;
+    button.classList.toggle('active', isActive);
+    button.setAttribute('aria-pressed', String(isActive));
+  });
+}
+
+function setLanguage(lang) {
+  if (!i18n[lang] || lang === currentLang) return;
+  applyLanguage(lang);
+
+  if (rawRows.length > 0) {
+    crossoverData = rawRows.map(mapRow).filter(r => r.competitorModel && r.geaModel);
+  }
+
+  if (resultsSection.style.display !== 'none' && lastSearchQuery) {
+    const matches = findMatches(lastSearchQuery);
+    renderResults(matches, lastSearchQuery);
+  }
+}
+
+// CSV Parser
 function parseCSV(text) {
   const lines = text.split(/\r?\n/).filter(l => l.trim());
   const headers = splitCSVLine(lines[0]);
@@ -322,21 +482,13 @@ function splitCSVLine(line) {
   return result;
 }
 
-// ─────────────────────────────────────────────
-//  Map a CSV row → result object
-//
-//  curbAdapter field logic:
-//  - blank                            → Curb Required: Yes, Part: "GE Appliances does not stock..."
-//  - "no transition curb needed"      → Curb Required: No
-//  - "ducting transition may be..."   → Curb Required: Yes, Part: "Ducting Transition may be required."
-//  - anything else (a part number)    → Curb Required: Yes, Part: <the part number>
-// ─────────────────────────────────────────────
+// Map a CSV row to a result object.
 function mapRow(row) {
   const curbAdapter = (row['curbAdapter'] || '').trim();
   const geaModel    = (row['GEAModelNumber'] || row['alliedModelNumber'] || '').trim();
   const competitor  = (row['CompetitorModelNumber'] || row['title'] || '').trim();
 
-  let curbRequired      = 'No';
+  let curbRequired      = getText('no');
   let curbPartNumber    = '';
   let curbNote          = '';
   let curbAdapterStatus = '';
@@ -344,24 +496,19 @@ function mapRow(row) {
   const lowerCurb = curbAdapter.toLowerCase();
 
   if (curbAdapter === '') {
-    // Blank → we don't stock a curb adapter
-    curbRequired   = 'Yes';
-    curbPartNumber = 'GE Appliances does not stock this necessary curb adaptor. Please contact distributor for further assistance.';
+    curbRequired   = getText('yes');
+    curbPartNumber = getText('curbAdapterNotStocked');
 
   } else if (lowerCurb === 'no transition curb needed') {
-    // No curb needed at all
-    curbRequired = 'No';
+    curbRequired = getText('no');
 
   } else if (lowerCurb.includes('ducting transition may be required')) {
-    // ── KEY FIX ──
-    // Treat as curb required, surface the text as the part number
-    curbRequired      = 'Yes';
-    curbPartNumber    = curbAdapter; // "Ducting Transition may be required."
-    curbAdapterStatus = 'Ducting Transition';
+    curbRequired      = getText('yes');
+    curbPartNumber    = getText('ductingTransitionRequired');
+    curbAdapterStatus = getText('ductingTransitionStatus');
 
   } else {
-    // Actual part number (e.g. "10L32", "31B67", etc.)
-    curbRequired   = 'Yes';
+    curbRequired   = getText('yes');
     curbPartNumber = curbAdapter;
   }
 
@@ -375,27 +522,23 @@ function mapRow(row) {
   };
 }
 
-// ─────────────────────────────────────────────
-//  Load CSV
-// ─────────────────────────────────────────────
+// Load CSV
 async function loadData() {
   try {
     const resp = await fetch(CSV_PATH);
     if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
     const text = await resp.text();
-    const rows = parseCSV(text);
-    crossoverData = rows.map(mapRow).filter(r => r.competitorModel && r.geaModel);
+    rawRows = parseCSV(text);
+    crossoverData = rawRows.map(mapRow).filter(r => r.competitorModel && r.geaModel);
     loadingEl.style.display  = 'none';
     searchCard.style.display = 'block';
   } catch (err) {
-    loadingEl.textContent = `⚠️ Could not load data: ${err.message}. Make sure the CSV file is in the same folder as this HTML file and open the page through a local web server.`;
+    loadingEl.textContent = `${getText('loadErrorPrefix')}: ${err.message}. ${getText('loadErrorSuffix')}`;
     console.error(err);
   }
 }
 
-// ─────────────────────────────────────────────
-//  Autocomplete
-// ─────────────────────────────────────────────
+// Autocomplete
 function updateSuggestions(query) {
   if (query.length < 2) { hideDropdown(); return; }
   const q = query.toLowerCase();
@@ -440,22 +583,32 @@ function selectSuggestion(model) {
   hideDropdown();
 }
 
-// ─────────────────────────────────────────────
-//  Search
-// ─────────────────────────────────────────────
+// Search
+function findMatches(query) {
+  return crossoverData.filter(
+    item => item.competitorModel.toLowerCase() === query.toLowerCase()
+  );
+}
+
 function handleSearch() {
   const query = searchInput.value.trim();
   if (!query) return;
   hideDropdown();
-  const matches = crossoverData.filter(
-    item => item.competitorModel.toLowerCase() === query.toLowerCase()
-  );
+  lastSearchQuery = query;
+  const matches = findMatches(query);
   renderResults(matches, query);
 }
 
-// ─────────────────────────────────────────────
-//  Render Results
-// ─────────────────────────────────────────────
+function escapeHTML(value) {
+  return String(value)
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#039;');
+}
+
+// Render Results
 function renderResults(matches, query) {
   resultsSection.style.display = 'block';
 
@@ -470,12 +623,8 @@ function renderResults(matches, query) {
           <line x1="12" y1="16" x2="12" y2="16.5"/>
         </svg>
         <div>
-          <h3>Model not found</h3>
-          <p>
-            Model not found. Please verify the model number and try again.
-            If you continue to experience issues, please contact
-            <a href="mailto:HVACsupport@geappliances.com">HVACsupport@geappliances.com</a>
-          </p>
+          <h3>${getText('modelNotFoundTitle')}</h3>
+          <p>${getText('modelNotFoundMessageHtml')}</p>
         </div>
       </div>`;
     return;
@@ -485,39 +634,33 @@ function renderResults(matches, query) {
 
   let html = `
     <p class="results-title">
-      GE Appliances Model Number${matches.length > 1 ? 's' : ''}:
-      <span>${geaModels}</span>
+      ${getText('geaModelNumbersLabel')}
+      <span>${escapeHTML(geaModels)}</span>
     </p>
-    <p class="curb-info-title">Curb Information</p>
+    <p class="curb-info-title">${getText('curbInfoTitle')}</p>
     <div class="results-list">`;
 
   matches.forEach(result => {
-    html += `<div class="result-item">`;
-    html += `<p class="result-model">${result.geaModel}</p>`;
+    html += '<div class="result-item">';
+    html += `<p class="result-model">${escapeHTML(result.geaModel)}</p>`;
+    html += `<p class="result-detail"><strong>${getText('curbRequiredLabel')}</strong> ${escapeHTML(result.curbRequired)}</p>`;
 
-    // All cases now use the standard display —
-    // curbRequired + curbPartNumber covers every scenario including Ducting Transition
-    html += `<p class="result-detail"><strong>Curb Required:</strong> ${result.curbRequired}</p>`;
-
-    if (result.curbRequired === 'Yes' && result.curbPartNumber) {
-      html += `<p class="result-detail"><strong>Curb Part Number:</strong> ${result.curbPartNumber}</p>`;
+    if (result.curbRequired === getText('yes') && result.curbPartNumber) {
+      html += `<p class="result-detail"><strong>${getText('curbPartNumberLabel')}</strong> ${escapeHTML(result.curbPartNumber)}</p>`;
     }
 
     if (result.curbNote) {
-      html += `<p class="result-detail">${result.curbNote}</p>`;
+      html += `<p class="result-detail">${escapeHTML(result.curbNote)}</p>`;
     }
 
-    html += `</div>`;
+    html += '</div>';
   });
 
-  html += `</div>`;
-
+  html += '</div>';
   resultsSection.innerHTML = html;
 }
 
-// ─────────────────────────────────────────────
-//  Event Listeners
-// ─────────────────────────────────────────────
+// Event Listeners
 searchInput.addEventListener('input', () => updateSuggestions(searchInput.value));
 
 searchInput.addEventListener('keydown', (e) => {
@@ -545,12 +688,13 @@ searchInput.addEventListener('keydown', (e) => {
 searchInput.addEventListener('blur', () => setTimeout(hideDropdown, 150));
 searchBtn.addEventListener('click', handleSearch);
 
-// ─────────────────────────────────────────────
-//  Boot
-// ─────────────────────────────────────────────
+languageButtons.forEach((button) => {
+  button.addEventListener('click', () => setLanguage(button.dataset.langToggle));
+});
+
+// Boot
+applyLanguage(currentLang);
 loadData();
 </script>
-
-
 </body>
 </html>
