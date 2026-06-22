@@ -274,7 +274,7 @@
 //  Configuration
 // ─────────────────────────────────────────────
 //const CSV_PATH = 'https://www.geappliancesairandwater.com/content/AAE Cross Over Item_contents_2_4_2026_Z Series.csv';
-const CSV_PATH = 'C:\\GitHub\\ghes\\bc\\crossover-tool\\Z_And_Q_Series_Q2.csv';
+const CSV_PATH = 'Z_And_Q_Series_Q2.csv';
 // ─────────────────────────────────────────────
 //  State
 // ─────────────────────────────────────────────
@@ -333,8 +333,8 @@ function splitCSVLine(line) {
 // ─────────────────────────────────────────────
 function mapRow(row) {
   const curbAdapter = (row['curbAdapter'] || '').trim();
-  const geaModel    = (row['GEAModelNumber'] || '').trim();
-  const competitor  = (row['CompetitorModelNumber'] || '').trim();
+  const geaModel    = (row['GEAModelNumber'] || row['alliedModelNumber'] || '').trim();
+  const competitor  = (row['CompetitorModelNumber'] || row['title'] || '').trim();
 
   let curbRequired      = 'No';
   let curbPartNumber    = '';
@@ -388,7 +388,7 @@ async function loadData() {
     loadingEl.style.display  = 'none';
     searchCard.style.display = 'block';
   } catch (err) {
-    loadingEl.textContent = `⚠️ Could not load data: ${err.message}. Make sure the CSV file is in the same folder as this HTML file.`;
+    loadingEl.textContent = `⚠️ Could not load data: ${err.message}. Make sure the CSV file is in the same folder as this HTML file and open the page through a local web server.`;
     console.error(err);
   }
 }
