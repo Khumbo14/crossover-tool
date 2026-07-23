@@ -350,6 +350,8 @@ const i18n = {
     curbPartNumberLabel: 'Curb Part Number:',
     yes: 'Yes',
     no: 'No',
+    onlyAvailableIn3Phase: 'only available in 3 phase',
+    noLongerManufactured: 'No Longer Manufactured. Contact Your Distributor For More Options',
     curbAdapterNotStocked: 'GE Appliances does not stock this necessary curb adaptor. Please contact distributor for further assistance.',
     ductingTransitionRequired: 'Ducting Transition may be required.',
     ductingTransitionStatus: 'Ducting Transition'
@@ -358,7 +360,7 @@ const i18n = {
     documentTitle: 'Outil de correspondance pour unités de toit commerciales',
     languageSelectorLabel: 'Sélecteur de langue',
     appTitle: 'Outil de correspondance pour unités de toit commerciales',
-    introText: 'L\'outil de correspondance pour unités de toit commerciales vous donne un accès instantané aux équivalences d\'unités de toit. Peu importe la marque ou le modèle à remplacer, cet outil facile à utiliser peut vous aider à trouver une unité monobloc GE Appliances Air & Water comparable.',
+    introText: 'L’outil de correspondance pour unités de toit monoblocs commerciales vous donne un accès instantané aux modèles équivalents. Peu importe la marque ou le modèle que vous remplacez, cet outil facile à utiliser peut vous aider à trouver une unité monobloc comparable de GE Appliances Air & Water.',
     loading: 'Chargement des données de correspondance...',
     searchLabel: 'Entrez le numéro de modèle du concurrent',
     searchPlaceholder: 'Entrez le numéro de modèle existant',
@@ -375,6 +377,8 @@ const i18n = {
     curbPartNumberLabel: 'Numéro de pièce de la bordure de toit :',
     yes: 'Oui',
     no: 'Non',
+    onlyAvailableIn3Phase: 'disponible uniquement en triphas\u00e9',
+    noLongerManufactured: 'N\u2019est plus fabriqu\u00e9. Communiquez avec votre distributeur pour obtenir d\u2019autres options',
     curbAdapterNotStocked: 'GE Appliances ne tient pas en stock l’adaptateur de bordure de toit requis. Veuillez communiquer avec le distributeur pour obtenir de l’aide.',
     ductingTransitionRequired: 'Une transition de conduits peut être requise.',
     ductingTransitionStatus: 'Transition de conduits'
@@ -404,6 +408,27 @@ const languageButtons = document.querySelectorAll('[data-lang-toggle]');
 
 function getText(key) {
   return (i18n[currentLang] && i18n[currentLang][key]) || i18n.en[key] || '';
+}
+
+function normalizeCrossoverText(value) {
+  return value.replace(
+    /\bNo Longer In Production\. Contact Commercial Applications For More Options\b/gi,
+    'No Longer Manufactured. Contact Your Distributor For More Options'
+  );
+}
+
+function localizeCrossoverText(value) {
+  if (currentLang === 'en') return value;
+
+  return value
+    .replace(
+      /\bonly available in 3 phase\b/gi,
+      getText('onlyAvailableIn3Phase')
+    )
+    .replace(
+      /\bNo Longer Manufactured\. Contact Your Distributor For More Options\b/gi,
+      getText('noLongerManufactured')
+    );
 }
 
 function applyLanguage(lang) {
@@ -485,7 +510,11 @@ function splitCSVLine(line) {
 // Map a CSV row to a result object.
 function mapRow(row) {
   const curbAdapter = (row['curbAdapter'] || '').trim();
-  const geaModel    = (row['GEAModelNumber'] || row['alliedModelNumber'] || '').trim();
+  const geaModel    = localizeCrossoverText(
+    normalizeCrossoverText(
+      (row['GEAModelNumber'] || row['alliedModelNumber'] || '').trim()
+    )
+  );
   const competitor  = (row['CompetitorModelNumber'] || row['title'] || '').trim();
 
   let curbRequired      = getText('no');
